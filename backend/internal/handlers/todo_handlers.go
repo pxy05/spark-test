@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"backend/internal/database"
-	"backend/internal/types"
+	"backend/pkg/types"
 	"encoding/json"
 	"net/http"
 )

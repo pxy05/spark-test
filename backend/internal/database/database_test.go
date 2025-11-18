@@ -1,7 +1,7 @@
 package database
 
 import (
-	"backend/internal/types"
+	"backend/pkg/types"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
