@@ -16,15 +16,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    color: rgb(92, 92, 92);
 
-    padding: 0px 20px;
+    padding: 15px;
 
-    background-color: #303540;
-
+    border-radius: 20px;
+    border-width: 2px;
     border-style: solid;
-    border-color: #464e61;
-    border-width: 1px;
-    border-radius: 15px;
+    border-color: #9e9e9e65;
+    background-color: #ffffff;
+
+
+    max-width: 100%;
 
     margin: 10px 0px;
   }
@@ -34,7 +37,7 @@
     flex-direction: column;
     align-items: start;
 
-    padding: 15px 0px;
+    max-width: 100%;
   }
 
   .todo-title {
@@ -43,6 +46,9 @@
 
     margin: 0px;
     margin-bottom: 5px;
+
+    word-wrap: break-word;
+    max-width: 100%;
   }
 
   .todo-description {
@@ -50,8 +56,9 @@
     margin: 0px;
 
     font-size: 20px;
-    color: #ddd;
 
     text-align: left;
+    word-break: break-all;
+    max-width: 100%;
   }
 </style>

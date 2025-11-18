@@ -1,26 +1,75 @@
 <script lang="ts">
   import Todo from "./lib/Todo.svelte";
   import type { TodoItem } from "./lib/types";
+  import { fetchTodos, postTodos } from "./server/server"
 
-  let todos: TodoItem[] = $state([]);
+  let todos: TodoItem[] | undefined = $state([]);
 
-  async function fetchTodos() {
-    try {
-      const response = await fetch("http://localhost:8080/");
-      if (response.status !== 200) {
-        console.error("Error fetching data. Response status not 200");
-        return;
-      }
+  let todoTitle: string = $state("");
+  let todoDescription: string = $state("");
+  let todoError: string = $state("");
 
-      todos = await response.json();
-    } catch (e) {
-      console.error("Could not connect to server. Ensure it is running.", e);
-    }
+  const MISSING_TITLE_ERROR = "Title cannot be empty.";
+  const MISSING_DESCRIPTION_ERROR = "Description cannot be empty.";
+  const POST_ERROR = "Error creating TodoItem."
+
+  function resetTodoFields() {
+    todoTitle = "";
+    todoDescription = "";
+    todoError = "";
   }
+
+  function updateTodoError(error: string) {
+    console.log(error);
+    todoError = error;
+  }
+
+
+async function handleSubmission(): Promise<void> {
+  event?.preventDefault();
+  const title = todoTitle.trim();
+  const description = todoDescription.trim();
+
+  if (title === "") {
+    updateTodoError(MISSING_TITLE_ERROR)
+    return undefined;
+  }
+
+  if (description === "") {
+    updateTodoError(MISSING_DESCRIPTION_ERROR);
+    return undefined;
+  }
+
+  const todoItem: TodoItem = {
+    title: title,
+    description: description,
+  }
+
+  let response: TodoItem | undefined;
+  
+  response = await postTodos(todoItem)
+
+
+  if (response === undefined) {
+    todoError = POST_ERROR;
+    return;
+  }
+
+  console.log("successful post:", response)
+
+  if (todos !== undefined) {
+    todos.push(response);
+  }
+  
+  resetTodoFields();
+
+}
 
   // Initially fetch todos on page load
   $effect(() => {
-    fetchTodos();
+    (async () => {
+      todos = await fetchTodos();
+    })();
   });
 </script>
 
@@ -28,47 +77,26 @@
   <header class="app-header">
     <h1>TODO</h1>
   </header>
+<div class="todo-container">
+    <div class="form-container default-card">
+      <h2 class="todo-list-form-header">Add a Todo</h2>
+      <form class="todo-list-form" onsubmit={handleSubmission}>
+        <input bind:value={todoTitle} placeholder="Title" name="title" />
+        <input bind:value={todoDescription} placeholder="Description" name="description" />
+        <button type="submit" >Add Todo</button>
+        <p class="form-error">{todoError}</p>
+      </form>
+    </div>
+      <div class="todo-list">
+      {#if todos === undefined}
+        <Todo title="Could not connect to Server" description="" />
+      {:else}
+      {#each todos as todo}
+        <Todo title={todo.title} description={todo.description} />
+      {/each}
 
-  <div class="todo-list">
-    {#each todos as todo}
-      <Todo title={todo.title} description={todo.description} />
-    {/each}
+      {/if}
+
+    </div>
   </div>
-
-  <h2 class="todo-list-form-header">Add a Todo</h2>
-  <form class="todo-list-form">
-    <input placeholder="Title" name="title" />
-    <input placeholder="Description" name="description" />
-    <button>Add Todo</button>
-  </form>
 </main>
-
-<style>
-  .app {
-    color: white;
-    background-color: #282c34;
-
-    text-align: center;
-    font-size: 24px;
-
-    min-height: 100vh;
-    padding: 20px;
-  }
-
-  .app-header {
-    font-size: calc(10px + 4vmin);
-    margin-top: 50px;
-  }
-
-  .todo-list {
-    margin: 50px 100px 0px 100px;
-  }
-
-  .todo-list-form-header {
-    margin-top: 100px;
-  }
-
-  .todo-list-form {
-    margin-top: 10px;
-  }
-</style>
